@@ -1,12 +1,9 @@
-const { Task } = require("./domain");
+const { Task } = require("../models/task");
 
 class TaskRepository {
-  constructor() {
-    this.tasks = [
-      new Task({ id: 1, title: "Analizar el proyecto base", description: "Identificar responsabilidades", status: "en progreso" }),
-      new Task({ id: 2, title: "Diseñar la arquitectura", description: "Proponer módulos", status: "pendiente" })
-    ];
-    this.nextId = 3;
+  constructor(initialTasks = []) {
+    this.tasks = initialTasks.map(task => new Task(task));
+    this.nextId = Math.max(0, ...this.tasks.map(task => task.id)) + 1;
   }
 
   findAll() {
