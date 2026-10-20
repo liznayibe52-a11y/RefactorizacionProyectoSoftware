@@ -1,5 +1,8 @@
 const VALID_STATUSES = ["pendiente", "en progreso", "finalizada"];
 
+class TaskValidationError extends Error {}
+class TaskNotFoundError extends Error {}
+
 class TaskService {
   constructor(repository) {
     this.repository = repository;
@@ -11,27 +14,21 @@ class TaskService {
 
   createTask({ title, description = "" }) {
     if (typeof title !== "string" || title.trim().length < 3) {
-      const error = new Error("El título debe tener al menos 3 caracteres.");
-      error.statusCode = 400;
-      throw error;
+      throw new TaskValidationError("El título debe tener al menos 3 caracteres.");
     }
     return this.repository.create({ title: title.trim(), description: String(description).trim(), status: "pendiente" });
   }
 
   changeStatus(id, status) {
     if (!VALID_STATUSES.includes(status)) {
-      const error = new Error(`Estado inválido. Use: ${VALID_STATUSES.join(", ")}.`);
-      error.statusCode = 400;
-      throw error;
+      throw new TaskValidationError(`Estado inválido. Use: ${VALID_STATUSES.join(", ")}.`);
     }
     const updated = this.repository.updateStatus(id, status);
     if (!updated) {
-      const error = new Error("No existe una tarea con ese identificador.");
-      error.statusCode = 404;
-      throw error;
+      throw new TaskNotFoundError("No existe una tarea con ese identificador.");
     }
     return updated;
   }
 }
 
-module.exports = { TaskService };
+module.exports = { TaskService, TaskValidationError, TaskNotFoundError };
